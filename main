@@ -1,0 +1,93 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy import array
+import math
+
+
+def animate(x,y,f,iteration,lim=False, xlim=(1,1),ylim=(1,1)):
+    """
+    x: x data
+    y: y data
+    t: framerate in frames/second
+    xlim: x range plot limit
+    ylim: y range plot limit
+    """
+    ##Animation
+
+    plt.clf() #clears figure, deactivate if you want to see former figure elements
+    for i in range(len(x)):
+        plt.scatter(x[i],y[i],cmap="Spectral")
+
+    if lim==True:
+        plt.xlim(xlim)
+        plt.ylim(ylim)
+
+    plt.draw()  # redraw and update the current plot
+    #plt.hold(True) #deprecated in python 3
+    plt.pause(1/f) #time between plots
+    plt.savefig("output/frame"+str(iteration))
+
+def distance(x,y):
+    return np.sqrt(x**2+y**2)
+
+def return_minima(x,y):
+    xmin=0
+    ymin=0
+    if min(x)<=0:
+        xmin=min(x)*1.1
+    else:
+        xmin=min(x)*0.9
+
+    if min(y)<=0:
+        ymin=min(y)*1.1
+    else:
+        ymin=min(y)*0.9
+    return xmin,ymin
+
+###dont touch above ##############################################
+
+G=0.5 #Gravitational constant
+#add as many bodies as you want, just make sure that positions are not the same and that you enter M,x,y,vx,vy for every mass
+
+
+M=[10,28,20,15] #Masses of body
+
+
+x=[1,2,3,4] # X coordinates of masses
+y=[1,1,1,1] # Y coordinates of masses
+
+vx=[-1,0.1,0,1] # speed in x-direction
+vy=[1,2.2,2,1] # speed in y-direction
+
+delta_t=0.01
+iteration=0
+
+##dont touch below ########################################################
+
+
+while True:
+    iteration+=1
+    ax=np.zeros_like(M)
+    ay=np.zeros_like(M)
+    for i in range(len(M)): #iterate through Masses i
+        
+        for j in range(len(M)): # iterate through Masses j which attract on Mass i
+
+            if j!=i: #get acceleration of masses
+                ax[i]+=G*M[j]*(x[j]-x[i])/(distance(x[j]-x[i],y[j]-y[i]))**3
+                ay[i]+=G*M[j]*(y[j]-y[i])/(distance(x[j]-x[i],y[j]-y[i]))**3
+    
+    #update velocities
+    for i in range(len(M)):
+        vx[i]+=delta_t*ax[i]
+        vy[i]+=delta_t*ay[i]
+    
+    #update position
+    for i in range(len(M)):
+        x[i]+=delta_t*vx[i]
+        y[i]+=delta_t*vy[i]
+
+    #plot Positions
+    xmin,ymin=return_minima(x,y)
+    animate(x,y,15,iteration,lim=True,xlim=(xmin,max(x)*1.1),ylim=(ymin,max(y)*1.1))
+
